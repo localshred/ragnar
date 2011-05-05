@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
   
-  s.add_dependency 'amqp', '0.7.1'
-  s.add_development_dependency 'rspec', '2.5.0'
+  s.add_dependency 'amqp', '~>0.7.1'
+  s.add_development_dependency 'rspec', '~>2.5.0'
+  s.add_development_dependency 'evented-spec', '~>0.4.1'
 end
