@@ -31,7 +31,10 @@ The following code with Ragnar creates a single topic subscription on the 'event
 
     Ragnar.exchange(:topic, 'events') do |x|
       x.queue_prefix = :myservice # optional
-      x.subscribe('the.event.name') do |message|
+      x.subscribe('the.event.name') do |headers, payload|
+        # subscription code
+      end
+      x.subscribe(:queue => 'my.queue', :routing_key => '#.name') do |headers, payload|
         # subscription code
       end
     end
@@ -42,6 +45,9 @@ The equivalent AMQP code for the code above would be:
       channel  = AMQP::Channel.new(connection)
       exchange = channel.topic('events', :auto_delete => false)
       channel.queue('myservice.the.event.name').bind(exchange, :routing_key => 'the.event.name').subscribe do |headers, payload|
+        # subscription code
+      end
+      channel.queue('my.queue').bind(exchange, :routing_key => '#.name').subscribe do |headers, payload|
         # subscription code
       end
     end
