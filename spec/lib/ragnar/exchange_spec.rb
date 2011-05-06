@@ -29,23 +29,50 @@ describe Ragnar::Exchange do
   end
   
   describe '#subscribe' do
+    let(:exch) { Ragnar::Exchange.new(:topic, 'name') }
+    let(:subscription_block) { Proc.new {|m| true } }
+    
     it 'binds a queue to the channel and assigns the subscription to the queue' do
-      exch = Ragnar::Exchange.new(:topic, 'name')
-      subscription = Proc.new {|message| true }
       exch.channel.should_receive(:queue).with('the.event.name').and_return(queue = mock('queue'))
       queue.should_receive(:bind).with(exch.exchange, :routing_key => 'the.event.name').and_return(binding = mock('binding'))
-      binding.should_receive(:subscribe).with(subscription)
-      exch.subscribe('the.event.name', subscription)
+      binding.should_receive(:subscribe).with(subscription_block)
+      exch.subscribe('the.event.name', subscription_block)
       done
     end
     
     it 'uses the queue_prefix if present when setting the queue name' do
-      exch = Ragnar::Exchange.new(:topic, 'name')
       exch.queue_prefix = :my_service
       exch.channel.should_receive(:queue).with('my_service.the.event.name').and_return(queue = mock('queue'))
       queue.should_receive(:bind).with(exch.exchange, :routing_key => 'the.event.name').and_return(binding = mock('binding'))
       binding.should_receive(:subscribe)
       exch.subscribe('the.event.name')
+      done
+    end
+    
+    it 'accepts a hash for queue name and routing key' do
+      exch.queue_prefix = :my_service
+      exch.channel.should_receive(:queue).with('the.queue.name').and_return(queue = mock('queue'))
+      queue.should_receive(:bind).with(exch.exchange, :routing_key => 'the.event.#').and_return(binding = mock('binding'))
+      binding.should_receive(:subscribe)
+      exch.subscribe(:queue => 'the.queue.name', :routing_key => 'the.event.#')
+      done
+    end
+    
+    it 'cannot subscribe if a name is not given' do
+      exch.queue_prefix = :my_service
+      exch.channel.should_not_receive(:queue)
+      expect {
+        exch.subscribe(nil)
+      }.should raise_error(/Invalid queue name/)
+      done
+    end
+    
+    it 'uses' do
+      exch.queue_prefix = :my_service
+      exch.channel.should_not_receive(:queue)
+      expect {
+        exch.subscribe(nil)
+      }.should raise_error(/Invalid queue name/)
       done
     end
   end
