@@ -3,7 +3,6 @@ module Ragnar
     class Exchange
 
       attr_reader :exchange, :channel, :type, :name, :options
-      attr_accessor :queue_prefix
 
       def initialize type, name, opts={}
         @queue = Ragnar::Connector.bunny_connection.queue(name)

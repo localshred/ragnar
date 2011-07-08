@@ -3,7 +3,6 @@ module Ragnar
     class Exchange
 
       attr_reader :exchange, :channel, :type, :name, :options
-      attr_accessor :queue_prefix
 
       def initialize type, name, opts={}
         @type, @name, @options = type, name, opts
@@ -11,7 +10,7 @@ module Ragnar
         @exchange = @channel.__send__(@type, @name, @options)
       end
 
-      # def publish routing_key, message, opts={}
+      # def publish_multiple routing_key, messages, opts={}
         # EM.schedule do
           # @exchange.publish(message, opts.merge(:routing_key => routing_key))
         # end

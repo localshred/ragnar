@@ -11,19 +11,27 @@ module Ragnar
 
   module_function
 
-  def amqp_exchange type, name, options={}
-    exch = exchanges[key('AMQP', type, name)] || store(Ragnar::AMQP::Exchange.new(type, name, options))
+  def amqp_exchange(options={})
+    exch = exchanges[key('AMQP', @exchange_type, @exchange_name)] || store(Ragnar::AMQP::Exchange.new(@exchange_type, @exchange_name, options))
     yield(exch) if block_given?
     exch
   end
 
-  def bunny_exchange(type, name, options={})
-    exch = exchanges[key('Bunny', type, name)] || store(Ragnar::Bunny::Exchange.new(type, name, options))
+  def bunny_exchange(options={})
+    exch = exchanges[key('Bunny', @exchange_type, @exchange_name)] || store(Ragnar::Bunny::Exchange.new(@exchange_type, @exchange_name, options))
     yield(exch) if(block_given?)
     exch
   end
 
-  def store ex
+  def exchange_type=(type)
+    @exchange_type = type
+  end
+
+  def exchange_name=(name)
+    @exchange_name = name
+  end
+
+  def store(ex)
     exchanges[key(ex.class.to_s.split('::')[1], ex.type, ex.name)] = ex
   end
 
@@ -31,7 +39,7 @@ module Ragnar
     @exchanges ||= {}
   end
 
-  def key klass, type, name
+  def key(klass, type, name)
     '%s-%s-%s' % [klass, type.to_s, name]
   end
 
