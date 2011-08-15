@@ -6,12 +6,19 @@ module Ragnar
     
     def initialize type, name, opts={}
       @type, @name, @options = type, name, opts
-      @channel = AMQP::Channel.new(Ragnar::Connector.connection)
-      @exchange = @channel.__send__(@type, @name, @options)
     end
     
     def publish routing_key, message, opts={}
-      @exchange.publish(message, opts.merge(:routing_key => routing_key))
+      EM.schedule do
+        Ragnar::Connector.connect unless Ragnar::Connector.connected?
+        
+        connection = Ragnar::Connector.connection
+        channel = AMQP::Channel.new(connection)
+        exchange = channel.__send__(@type, @name, @options)
+      
+        channel.queue(@name).bind(exchange, opts.merge(routing_key: routing_key))
+        exchange.publish(message, opts.merge(:routing_key => routing_key))
+      end
     end
     
     # Takes a subscription key or queue/routing options
@@ -28,8 +35,19 @@ module Ragnar
         queue_name = queue_prefix.nil? ? name : '%s.%s' % [queue_prefix, name]
         routing_key = name
       end
-      @channel.queue(queue_name).bind(@exchange, :routing_key => routing_key).subscribe(subscribe_opts, &block)
+   
+      EM.schedule do
+        Ragnar::Connector.connect unless Ragnar::Connector.connected?
+        
+        connection = Ragnar::Connector.connection
+        channel = AMQP::Channel.new(connection)
+        exchange = channel.__send__(@type, @name, @options)
+        
+        channel.queue(queue_name).bind(exchange, :routing_key => routing_key).subscribe(subscribe_opts, &block)
+      end
     end
+    
+    
     
   end
 end

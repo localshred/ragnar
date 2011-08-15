@@ -8,14 +8,15 @@ module Ragnar
       
       # Store the connection for later retrieval
       attr_accessor :connection
+      attr_accessor :host
+      attr_accessor :port
+      
+      @host = 'localhost'
+      @port = '5762'
       
       # Pass connection options through to AMQP
-      def connect opts={}
-        unless EM.reactor_running?
-          Thread.new { EventMachine.run }
-          sleep 0.5
-        end
-        @connection = AMQP.connect(opts)
+      def connect
+        @connection = AMQP.connect({host: @host, port: @port})
       end
       
       def connected?

@@ -6,6 +6,7 @@ describe Ragnar::Exchange do
   include EventedSpec::SpecHelper
   include EventedSpec::AMQPSpec
   
+  
   describe '.new' do
     it 'creates a channel and exchange' do
       opts = {:durable => true}

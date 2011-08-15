@@ -7,23 +7,21 @@ describe Ragnar::Connector do
   
   before(:each) do
     Ragnar::Connector.connection = nil
+    Ragnar::Connector.host = 'localhost'
+    Ragnar::Connector.port = '5762'
   end
   
   describe '.connect' do
     
-    it 'runs eventmachine and creates an AMQP connection' do
-      connection = Ragnar::Connector.connect
-      delayed(0.3) {
-        EM.reactor_running?.should be_true
-        connection.should be_connected
-        done
-      }
-    end
-    
-    it 'accepts an options hash and passes it through' do
-      opts = {:host => 'localhost', :port => '5762'}
-      AMQP.should_receive(:connect).with(opts)
-      Ragnar::Connector.connect(opts)
+    it 'can set host and port and have a connection' do
+      host = 'test.md.com'
+      port = '5763'
+      
+      Ragnar::Connector.host = host
+      Ragnar::Connector.port = port
+      
+      AMQP.should_receive(:connect).with({host: host, port: port})
+      Ragnar::Connector.connect
       done
     end
     
