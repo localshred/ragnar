@@ -11,12 +11,10 @@ module Ragnar
       attr_accessor :host
       attr_accessor :port
       
-      @host = 'localhost'
-      @port = '5762'
       
       # Pass connection options through to AMQP
       def connect
-        @connection = AMQP.connect({host: @host, port: @port})
+        @connection = AMQP.connect({host: @host || 'localhost', port: @port || 5762})
       end
       
       def connected?
