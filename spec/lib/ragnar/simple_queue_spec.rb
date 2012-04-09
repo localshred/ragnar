@@ -11,7 +11,8 @@ describe Ragnar::SimpleQueue do
     end
 
     let(:bunny_mock) do
-      bm = mock('bunny')
+      bm = mock('Bunny')
+      bm.stub(:setup)
       bm.stub(:stop)
       bm.stub(:connected?)
       bm.stub(:start)
@@ -19,7 +20,7 @@ describe Ragnar::SimpleQueue do
       bm
     end
 
-    before(:each) { Bunny.stub(:new).and_return(bunny_mock) }
+    before(:each) { ::Bunny.stub(:run).and_yield(bunny_mock) }
 
     it %{publishes a message} do
       message = 'publish me'
