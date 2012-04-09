@@ -3,7 +3,7 @@ require 'ragnar'
 require 'ragnar/simple_queue'
 
 describe Ragnar::SimpleQueue do
-  describe '#publish_topic' do
+  describe '#publish' do
     let(:bunny_exchange) do
       m = mock
       m.stub(:exchange)
@@ -26,7 +26,7 @@ describe Ragnar::SimpleQueue do
       message = 'publish me'
       route = 'to.the.batcave'
       bunny_exchange.should_receive(:publish).with(message, {:key => route})
-      described_class.publish_topic(message, route)
+      described_class.publish(message, route, 'event_exchange')
     end
 
   end
