@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'bunny'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'evented-spec', '~>0.4.1'
+  s.add_development_dependency 'pry'
 end
