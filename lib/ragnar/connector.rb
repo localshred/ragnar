@@ -14,9 +14,9 @@ module Ragnar
       # Pass connection options through to AMQP
       def connect
         # backwards compatible code
-        host = @host.nil? ? Ragnar::Config.host : @host
-        port = @port.nil? ? Ragnar::Config.port : @port
-        @connection = AMQP.connect({:host => @host, :port => @port})
+        @host ||= ::Ragnar::Config.host
+        @port ||= ::Ragnar::Config.port
+        @connection = ::AMQP.connect({:host => @host, :port => @port})
       end
 
       def connected?

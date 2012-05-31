@@ -16,7 +16,7 @@ module Ragnar
         channel = AMQP::Channel.new(connection)
         exchange = channel.__send__(@type, @name, @options)
 
-        channel.queue(@name).bind(exchange, opts.merge(routing_key: routing_key))
+        channel.queue(@name).bind(exchange, opts.merge(:routing_key => routing_key))
         exchange.publish(message, opts.merge(:routing_key => routing_key))
       end
     end
