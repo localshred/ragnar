@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'ragnar/connector'
+require 'ragnar.rb'
 
 describe Ragnar::Connector do
   include EventedSpec::SpecHelper
@@ -10,6 +10,8 @@ describe Ragnar::Connector do
 
   before(:each) do
     Ragnar::Connector.connection = nil
+    Ragnar::Connector.host = nil
+    Ragnar::Connector.port = nil
   end
 
   describe '.connect' do
@@ -24,10 +26,6 @@ describe Ragnar::Connector do
     end
 
     context 'deprecated configuration methods' do
-      before(:each) do
-        Ragnar::Connector.host = 'localhost'
-        Ragnar::Connector.port = '5762'
-      end
 
       it 'can set host and port and have a connection' do
         AMQP.stub(:connect)
