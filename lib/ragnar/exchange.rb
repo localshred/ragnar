@@ -41,6 +41,13 @@ module Ragnar
 
         connection = Ragnar::Connector.connection
         channel = AMQP::Channel.new(connection)
+        channel.auto_recovery = true
+        connection.on_tcp_connection_loss do |session, settings|
+          # AMQP::Session#reconnect(force = false, period = 2)
+          # doesn't immediately force reconnect and waits 2 seconds before
+          # trying to reconnect (infinitely retries)
+          session.reconnect
+        end
         exchange = channel.__send__(@type, @name, @options)
 
         channel.queue(queue_name).bind(exchange, :routing_key => routing_key).subscribe(subscribe_opts, &block)
