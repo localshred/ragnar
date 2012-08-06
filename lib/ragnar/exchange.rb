@@ -10,12 +10,7 @@ module Ragnar
 
     def publish routing_key, message, opts={}
       EM.schedule do
-        Ragnar::Connector.connect unless Ragnar::Connector.connected?
-
-        connection = Ragnar::Connector.connection
-        channel = AMQP::Channel.new(connection)
-        exchange = channel.__send__(@type, @name, @options)
-
+        channel, exchange = setup_connection
         channel.queue(@name).bind(exchange, opts.merge(:routing_key => routing_key))
         exchange.publish(message, opts.merge(:routing_key => routing_key))
       end
@@ -37,14 +32,26 @@ module Ragnar
       end
 
       EM.schedule do
-        Ragnar::Connector.connect unless Ragnar::Connector.connected?
-
-        connection = Ragnar::Connector.connection
-        channel = AMQP::Channel.new(connection)
-        exchange = channel.__send__(@type, @name, @options)
-
+        channel, exchange = setup_connection
         channel.queue(queue_name).bind(exchange, :routing_key => routing_key).subscribe(subscribe_opts, &block)
       end
+    end
+
+  private
+    def setup_connection
+      Ragnar::Connector.connect unless Ragnar::Connector.connected?
+
+      connection = Ragnar::Connector.connection
+      channel = AMQP::Channel.new(connection)
+      channel.auto_recovery = true
+      connection.on_tcp_connection_loss do |session, settings|
+        # AMQP::Session#reconnect(force = false, period = 2)
+        # doesn't immediately force reconnect and waits 2 seconds before
+        # trying to reconnect (infinitely retries)
+        session.reconnect
+      end
+      exchange = channel.__send__(@type, @name, @options)
+      return [channel, exchange]
     end
   end
 end
